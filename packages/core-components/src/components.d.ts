@@ -76,6 +76,22 @@ export namespace Components {
     }
     interface B2bBackgroundBox {
         /**
+          * Whether the box should have a bottom border. Per default, the border is enabled
+         */
+        "borderBottom": 'default' | 'none';
+        /**
+          * Whether the box should have a left border. Per default, the border is enabled
+         */
+        "borderLeft": 'default' | 'none';
+        /**
+          * Whether the box should have a right border. Per default, the border is enabled
+         */
+        "borderRight": 'default' | 'none';
+        /**
+          * Whether the box should have a top border. Per default, the border is enabled
+         */
+        "borderTop": 'default' | 'none';
+        /**
           * Fixes width to 1212px. Per default, it is false
          */
         "fixedWidth": boolean;
@@ -1274,10 +1290,6 @@ export namespace Components {
           * The value associated with the toggle chip. This is emitted when the chip is interacted with.
          */
         "value": any;
-        /**
-          * The color scheme of the toggle button. Use white for grey backgrounds and grey for white backgrounds. Per default, it is grey
-         */
-        "variant": 'grey' | 'white';
     }
     interface B2bToggleGroup {
         /**
@@ -2466,6 +2478,22 @@ declare namespace LocalJSX {
         "underlineText"?: boolean;
     }
     interface B2bBackgroundBox {
+        /**
+          * Whether the box should have a bottom border. Per default, the border is enabled
+         */
+        "borderBottom"?: 'default' | 'none';
+        /**
+          * Whether the box should have a left border. Per default, the border is enabled
+         */
+        "borderLeft"?: 'default' | 'none';
+        /**
+          * Whether the box should have a right border. Per default, the border is enabled
+         */
+        "borderRight"?: 'default' | 'none';
+        /**
+          * Whether the box should have a top border. Per default, the border is enabled
+         */
+        "borderTop"?: 'default' | 'none';
         /**
           * Fixes width to 1212px. Per default, it is false
          */
@@ -3842,10 +3870,6 @@ declare namespace LocalJSX {
           * The value associated with the toggle chip. This is emitted when the chip is interacted with.
          */
         "value": any;
-        /**
-          * The color scheme of the toggle button. Use white for grey backgrounds and grey for white backgrounds. Per default, it is grey
-         */
-        "variant"?: 'grey' | 'white';
     }
     interface B2bToggleGroup {
         /**
