@@ -145,13 +145,17 @@
     <div class="content-container">
       <b2b-headline size="200">Input list</b2b-headline>
       <div style="width: 40%">
-        <b2b-input-list id="i-list" placeholder="search here"></b2b-input-list>
+        <b2b-input-list
+          id="i-list"
+          placeholder="search here"
+          options-list=""></b2b-input-list>
         <script>
           const inputListEl = document.getElementById('i-list');
           inputListEl.optionsList = [
-            'result1',
-            'result2',
-            'result3',
+            'aresult1',
+            'abcresult2',
+            'abcdresult3',
+            'abcdresult4',
             'result4',
             'result4',
             'result4',
@@ -221,7 +225,7 @@
             <option value="one">
               Some longer text to check if the truncated acts as expected
             </option>
-            <option value="one">$</option>
+            <option value="two">$</option>
           </b2b-dropdown>
           <b2b-button variant="primary" disabled="true">
             <b2b-icon-100 icon="b2b_icon-search" clickable></b2b-icon-100>
@@ -266,12 +270,12 @@
         <b2b-input slot="start" label="Search Term"></b2b-input>
         <b2b-dropdown label="Data Set" invalid error="an error">
           <option value="one">Some longer text</option>
-          <option value="one">$</option>
+          <option value="two">$</option>
         </b2b-dropdown>
         <b2b-input label="Another input" invalid error="an error"></b2b-input>
         <b2b-dropdown>
           <option value="one">€</option>
-          <option value="one">$</option>
+          <option value="two">$</option>
         </b2b-dropdown>
         <b2b-button slot="end" variant="primary">
           <b2b-icon-100 icon="b2b_icon-search" clickable></b2b-icon-100>
@@ -396,11 +400,31 @@
     <div class="content-container">
       <b2b-headline id="Dropdown" size="200">Dropdown</b2b-headline>
       <b2b-dropdown
-        label="Classic Select"
+        label="Classic Select with search"
         hint="I am a hint"
         error="I am an error"
+        placeholder="Please select"
+        search
         required>
-        <option selected value="option-1">Option 1</option>
+        <option value="option-1">Option 1</option>
+        <option value="option-2">Option 2</option>
+        <option value="option-3">Option 3</option>
+        <option value="option-4">Option 4</option>
+        <option value="option-5">Option 5</option>
+        <option value="option-6">Option 6</option>
+        <option value="option-7">Option 7</option>
+        <option value="option-8">Option 8</option>
+        <option value="option-9">Option 9</option>
+        <option value="option-10">Option 10</option>
+      </b2b-dropdown>
+
+      <b2b-dropdown
+        label="Classic Select without search"
+        hint="I am a hint"
+        error="I am an error"
+        placeholder="Please select"
+        required>
+        <option value="option-1">Option 1</option>
         <option value="option-2">Option 2</option>
         <option value="option-3">Option 3</option>
         <option value="option-4">Option 4</option>
@@ -651,7 +675,7 @@
       datepickerEl1.disableDates = ['21.01.2025', '10.01.2025'];
     </script>
 
-    <div class="content-container" style="margin-bottom: 400px">
+    <div class="content-container">
       <b2b-headline id="DateRangePicker" size="200">
         Date Range Picker
       </b2b-headline>

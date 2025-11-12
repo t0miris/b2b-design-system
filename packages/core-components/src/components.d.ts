@@ -296,6 +296,10 @@ export namespace Components {
     }
     interface B2bCustomDropdown {
         /**
+          * The horizontal alignment of the dropdown. Can be 'left', 'center', or 'right'. Default is 'left'.
+         */
+        "alignment": 'left' | 'center' | 'right';
+        /**
           * Search is automatically disabled for lists with fewer than six options.
          */
         "autoDisableSearch": boolean;
@@ -624,6 +628,10 @@ export namespace Components {
           * Adds an asterisk at the end of the label to signify that the field is required.
          */
         "required": boolean;
+        /**
+          * Enables the search functionality when set to true within the dropdown. By default search is disabled.
+         */
+        "search": boolean;
     }
     interface B2bFlyoutMenu {
         "opened": boolean;
@@ -882,7 +890,7 @@ export namespace Components {
         /**
           * The list of options passed into the search dropdown. Can be static or dynamic, i.e. updated when the b2b-search or b2b-input emitters fire.
          */
-        "optionsList": string[];
+        "optionsList": string | string[];
         /**
           * The placeholder shown in the input field.
          */
@@ -3061,6 +3069,10 @@ declare namespace LocalJSX {
     }
     interface B2bCustomDropdown {
         /**
+          * The horizontal alignment of the dropdown. Can be 'left', 'center', or 'right'. Default is 'left'.
+         */
+        "alignment"?: 'left' | 'center' | 'right';
+        /**
           * Search is automatically disabled for lists with fewer than six options.
          */
         "autoDisableSearch"?: boolean;
@@ -3461,6 +3473,10 @@ declare namespace LocalJSX {
           * Adds an asterisk at the end of the label to signify that the field is required.
          */
         "required"?: boolean;
+        /**
+          * Enables the search functionality when set to true within the dropdown. By default search is disabled.
+         */
+        "search"?: boolean;
     }
     interface B2bFlyoutMenu {
         "opened"?: boolean;
@@ -3731,7 +3747,7 @@ declare namespace LocalJSX {
         /**
           * The list of options passed into the search dropdown. Can be static or dynamic, i.e. updated when the b2b-search or b2b-input emitters fire.
          */
-        "optionsList"?: string[];
+        "optionsList"?: string | string[];
         /**
           * The placeholder shown in the input field.
          */

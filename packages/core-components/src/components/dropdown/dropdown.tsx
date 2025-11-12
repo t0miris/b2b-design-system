@@ -22,6 +22,9 @@ export class DropdownComponent implements ComponentInterface {
   /** The dropdown label. */
   @Prop() label: string;
 
+  /** Enables the search functionality when set to true within the dropdown. By default search is disabled. */
+  @Prop({ reflect: true }) search: boolean = false;
+
   /** Adds an asterisk at the end of the label to signify that the field is required. */
   @Prop({ reflect: true }) required: boolean = false;
 
@@ -62,18 +65,31 @@ export class DropdownComponent implements ComponentInterface {
   b2bBlur: EventEmitter<FocusEvent>;
 
   private mutationObserver?: MutationObserver;
+  private ignoreNextMutation = false;
+  private selectEl: HTMLDivElement;
 
   /** Method to programmatically clear selection of the dropdown. */
   @Method()
   async clearSelection(): Promise<void> {
+    this.ignoreNextMutation = true;
+
     this.selectedValue = this.placeholderValue;
     this.selectedText = '';
     this.options = this.options.map(opt => ({
       ...opt,
       selected: false,
     }));
+
+    const nativeOptions = this.hostElement.querySelectorAll('option');
+    nativeOptions.forEach(opt => {
+      opt.removeAttribute('selected');
+      opt.selected = false;
+    });
+
     this.isOpen = false;
     this.updateTruncatedText();
+
+    this.ignoreNextMutation = false;
   }
 
   @State() isOpen: boolean = false;
@@ -87,7 +103,7 @@ export class DropdownComponent implements ComponentInterface {
     disabled: boolean;
   }[] = [];
 
-  private selectEl: HTMLDivElement;
+  @State() searchValue: string = '';
   @State() private truncatedText: string = '';
 
   componentWillLoad(): void {
@@ -95,7 +111,9 @@ export class DropdownComponent implements ComponentInterface {
 
     if (typeof MutationObserver !== 'undefined') {
       this.mutationObserver = new MutationObserver(() => {
-        this.initializeOptions();
+        if (!this.ignoreNextMutation) {
+          this.initializeOptions();
+        }
       });
 
       this.mutationObserver.observe(this.hostElement, {
@@ -162,6 +180,15 @@ export class DropdownComponent implements ComponentInterface {
     this.b2bBlur.emit(ev);
   };
 
+  private clearSelectedValue = (event: any) => {
+    event.stopPropagation();
+
+    this.clearSelection();
+
+    this.searchValue = '';
+    this.b2bChange.emit(this.placeholderValue);
+  };
+
   private closeOtherDropdowns() {
     const others = document.querySelectorAll('b2b-dropdown');
     others.forEach(el => {
@@ -175,22 +202,38 @@ export class DropdownComponent implements ComponentInterface {
     const label = target.textContent?.trim();
 
     if (value != null) {
+      this.ignoreNextMutation = true;
+
       this.selectedValue = value;
       this.selectedText = label || '';
-      this.b2bChange.emit(value);
 
       this.options = this.options.map(opt => ({
         ...opt,
         selected: opt.value === value,
       }));
 
+      const nativeOptions = this.hostElement.querySelectorAll('option');
+      nativeOptions.forEach(opt => {
+        if (opt.value === value) {
+          opt.setAttribute('selected', '');
+          opt.selected = true;
+        } else {
+          opt.removeAttribute('selected');
+          opt.selected = false;
+        }
+      });
+
       this.isOpen = false;
+      this.b2bChange.emit(value);
       this.updateTruncatedText();
+
+      this.ignoreNextMutation = false;
     }
   };
 
   private updateTruncatedText = () => {
-    const rawText = this.selectedText || this.placeholder;
+    const inputValue = this.search ? '' : this.placeholder;
+    const rawText = this.selectedText || inputValue;
     if (this.selectEl == null) {
       this.truncatedText = rawText;
       return;
@@ -234,10 +277,51 @@ export class DropdownComponent implements ComponentInterface {
     this.truncatedText = truncated + '…';
   };
 
+  private handleSearchInput = (event: CustomEvent) => {
+    if (
+      this.selectedText &&
+      (event.target as HTMLInputElement).value !== this.selectedText
+    ) {
+      this.selectedText = '';
+      this.selectedValue = this.placeholderValue;
+      this.options = this.options.map(opt => ({
+        ...opt,
+        selected: false,
+      }));
+    }
+
+    this.searchValue = (event.target as HTMLInputElement).value;
+
+    this.isOpen = true;
+  };
+
+  private toggleDropdownWithSearch = (event: any) => {
+    event.stopPropagation();
+    this.toggleDropdown();
+    if (this.isOpen) {
+      this.focusSearchInput();
+    }
+  };
+
+  private focusSearchInput = () => {
+    const inputComponent =
+      this.hostElement.shadowRoot?.querySelector('b2b-input');
+    if (inputComponent != null) {
+      const inputElement = inputComponent.shadowRoot?.querySelector('input');
+      if (inputElement != null) {
+        inputElement.focus();
+      }
+    }
+  };
+
   render() {
     const hasError = this.invalid && !this.disabled && !this.groupDisabled;
     const showHint = this.hint && !hasError;
     const showError = this.error && hasError;
+
+    const filteredOptions = this.options.filter(opt =>
+      opt.label.toLowerCase().includes(this.searchValue.toLowerCase()),
+    );
 
     return (
       <Host
@@ -256,23 +340,59 @@ export class DropdownComponent implements ComponentInterface {
           class="b2b-dropdown__wrapper"
           onFocus={this.onFocus}
           onBlur={this.onBlur}>
-          <div
-            class={{
-              'b2b-dropdown__select': true,
-              'b2b-dropdown__select--open': this.isOpen,
-              'b2b-dropdown__select--focused': this.focused,
-            }}
-            ref={el => (this.selectEl = el as HTMLDivElement)}
-            onClick={this.toggleDropdown}
-            role="combobox"
-            aria-expanded={`${this.isOpen}`}
-            aria-labelledby={this.name}>
-            {this.truncatedText}
-          </div>
-
+          {this.search ? (
+            <b2b-input
+              placeholder={this.placeholder}
+              invalid={hasError}
+              value={this.truncatedText || this.searchValue}
+              disabled={this.disabled || this.groupDisabled}
+              onB2b-focus={() => {
+                this.isOpen = true;
+                this.focused = true;
+              }}
+              onB2b-input={this.handleSearchInput}>
+              <div slot="end">
+                {(this.selectedText || this.searchValue) &&
+                  !this.disabled &&
+                  !this.groupDisabled && (
+                    <b2b-icon-100
+                      class="b2b-dropdown__clear-icon"
+                      icon={'b2b_icon-close'}
+                      clickable={true}
+                      onClick={this.clearSelectedValue}></b2b-icon-100>
+                  )}
+                <b2b-icon-100
+                  class="b2b-dropdown__arrow-icon"
+                  icon={'b2b_icon-arrow-down'}
+                  onClick={this.toggleDropdownWithSearch}></b2b-icon-100>
+              </div>
+            </b2b-input>
+          ) : (
+            <div
+              class={{
+                'b2b-dropdown__select': true,
+                'b2b-dropdown__select--open': this.isOpen,
+                'b2b-dropdown__select--focused': this.focused,
+              }}
+              ref={el => (this.selectEl = el as HTMLDivElement)}
+              onClick={this.toggleDropdown}
+              role="combobox"
+              aria-expanded={`${this.isOpen}`}
+              aria-labelledby={this.name}>
+              {this.truncatedText}
+              {this.selectedText && !this.disabled && !this.groupDisabled && (
+                <b2b-icon-100
+                  class="b2b-dropdown__clear-icon"
+                  onClick={this.clearSelectedValue}
+                  clickable={true}
+                  icon={'b2b_icon-close'}
+                />
+              )}
+            </div>
+          )}
           {this.isOpen && (
             <div class="b2b-dropdown__options" role="listbox">
-              {this.options.map(option => (
+              {filteredOptions.map(option => (
                 <div
                   key={option.value}
                   class={{
